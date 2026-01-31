@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Column } from "./Column";
 import { TaskCard } from "./TaskCard";
-import { getTasks, Task } from "@/api/tasks";
+import { getTasks, updateTask, deleteTask, Task } from "@/api/tasks";
 
 export function KanbanBoard() {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -28,6 +28,28 @@ export function KanbanBoard() {
         return tasks.filter(task => task.status === status);
     };
 
+    const handleDelete = async (taskId: number) => {
+        // Optimistic update
+        setTasks(prev => prev.filter(t => t.id !== taskId));
+        try {
+            await deleteTask(taskId);
+        } catch (error) {
+            console.error("Failed to delete task:", error);
+            fetchTasks();
+        }
+    };
+
+    const handleStatusChange = async (taskId: number, newStatus: string) => {
+        // Optimistic update
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+        try {
+            await updateTask(taskId, { status: newStatus });
+        } catch (error) {
+            console.error("Failed to update status:", error);
+            fetchTasks();
+        }
+    };
+
     return (
         <div className="flex h-full flex-1 gap-4 overflow-x-auto p-8 bg-[#F5F5F7]">
             {/* Pending Column */}
@@ -39,6 +61,8 @@ export function KanbanBoard() {
                         priority="Normal" // Default as backend doesn't support yet
                         assigneeName={task.assignee_name}
                         assigneeAvatar={task.assignee_avatar}
+                        onDelete={() => handleDelete(task.id)}
+                        onStatusChange={(status) => handleStatusChange(task.id, status)}
                     />
                 ))}
             </Column>
@@ -52,6 +76,8 @@ export function KanbanBoard() {
                         priority="Normal"
                         assigneeName={task.assignee_name}
                         assigneeAvatar={task.assignee_avatar}
+                        onDelete={() => handleDelete(task.id)}
+                        onStatusChange={(status) => handleStatusChange(task.id, status)}
                     />
                 ))}
             </Column>
@@ -65,6 +91,8 @@ export function KanbanBoard() {
                         priority="Normal"
                         assigneeName={task.assignee_name}
                         assigneeAvatar={task.assignee_avatar}
+                        onDelete={() => handleDelete(task.id)}
+                        onStatusChange={(status) => handleStatusChange(task.id, status)}
                     />
                 ))}
             </Column>
@@ -78,6 +106,8 @@ export function KanbanBoard() {
                         priority="Normal"
                         assigneeName={task.assignee_name}
                         assigneeAvatar={task.assignee_avatar}
+                        onDelete={() => handleDelete(task.id)}
+                        onStatusChange={(status) => handleStatusChange(task.id, status)}
                     />
                 ))}
             </Column>
