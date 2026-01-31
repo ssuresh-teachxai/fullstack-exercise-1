@@ -58,7 +58,7 @@ export function KanbanBoard() {
                     <TaskCard
                         key={task.id}
                         title={task.title}
-                        priority="Normal" // Default as backend doesn't support yet
+                        priority={task.priority as any}
                         assigneeName={task.assignee_name}
                         assigneeAvatar={task.assignee_avatar}
                         onDelete={() => handleDelete(task.id)}
@@ -73,7 +73,7 @@ export function KanbanBoard() {
                     <TaskCard
                         key={task.id}
                         title={task.title}
-                        priority="Normal"
+                        priority={task.priority as any}
                         assigneeName={task.assignee_name}
                         assigneeAvatar={task.assignee_avatar}
                         onDelete={() => handleDelete(task.id)}
@@ -88,7 +88,7 @@ export function KanbanBoard() {
                     <TaskCard
                         key={task.id}
                         title={task.title}
-                        priority="Normal"
+                        priority={task.priority as any}
                         assigneeName={task.assignee_name}
                         assigneeAvatar={task.assignee_avatar}
                         onDelete={() => handleDelete(task.id)}
@@ -103,7 +103,7 @@ export function KanbanBoard() {
                     <TaskCard
                         key={task.id}
                         title={task.title}
-                        priority="Normal"
+                        priority={task.priority as any}
                         assigneeName={task.assignee_name}
                         assigneeAvatar={task.assignee_avatar}
                         onDelete={() => handleDelete(task.id)}

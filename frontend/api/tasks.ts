@@ -13,6 +13,7 @@ export interface Task {
     status: string;
     assignee_name: string | null;
     assignee_avatar: string | null;
+    priority: string;
 }
 
 const API_BASE_URL = "http://localhost:8000";

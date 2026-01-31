@@ -51,6 +51,7 @@ export function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
                 priority: formData.priority,
                 assignee_name: assignee ? assignee.name : null,
                 assignee_avatar: assignee ? assignee.avatar : null,
+                priority: formData.priority
             };
 
             await createTask(payload);
