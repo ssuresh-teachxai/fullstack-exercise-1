@@ -1,12 +1,24 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import health_router, items_router
+from app.routes.tasks import router as tasks_router
 
-app = FastAPI(title="Backend Exercise API", version="1.0.0")
+app = FastAPI(title="TaskBoard API", version="1.0.0")
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Register routers
 app.include_router(health_router)
 app.include_router(items_router)
+app.include_router(tasks_router)
 
 
 if __name__ == "__main__":

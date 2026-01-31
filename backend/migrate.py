@@ -35,14 +35,63 @@ def run_migrations(action="upgrade"):
     migration_files = get_migration_files()
     
     if action == "downgrade":
-        migration_files = reversed(migration_files)
+        migration_files = list(reversed(migration_files))
     
-    for filepath in migration_files:
-        module = load_migration_module(filepath)
-        if action == "upgrade":
-            module.upgrade()
-        elif action == "downgrade":
-            module.downgrade()
+    conn = sqlite3.connect(DATABASE_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    # Ensure migrations table exists
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS _migrations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    
+    # Get applied migrations
+    cursor.execute("SELECT name FROM _migrations")
+    applied_migrations = {row[0] for row in cursor.fetchall()}
+    
+    try:
+        for filepath in migration_files:
+            module = load_migration_module(filepath)
+            migration_name = os.path.basename(filepath).replace(".py", "")
+            
+            # Skip already applied migrations for upgrade
+            if action == "upgrade" and migration_name in applied_migrations:
+                print(f"⏭️  Skipping {migration_name} (already applied)")
+                continue
+            
+            # Skip not-applied migrations for downgrade
+            if action == "downgrade" and migration_name not in applied_migrations:
+                print(f"⏭️  Skipping {migration_name} (not applied)")
+                continue
+            
+            print(f"Running {action} for: {migration_name}")
+            
+            if action == "upgrade":
+                module.upgrade(conn)
+                # Track this migration
+                cursor.execute("INSERT INTO _migrations (name) VALUES (?)", (migration_name,))
+            elif action == "downgrade":
+                module.downgrade(conn)
+                # Remove from tracking
+                cursor.execute("DELETE FROM _migrations WHERE name = ?", (migration_name,))
+            
+            conn.commit()
+            print(f"✅ {migration_name} - {action} completed")
+        
+        print(f"\n🎉 All migrations {action}d successfully!")
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"\n❌ Migration failed: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 def list_migrations():
